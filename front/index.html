@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WinRate - Star Wars Unlimited</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <header class="header">
@@ -22,7 +22,37 @@
             </form>
         </section>
 
-        <section class="auth-section"></section>
+        <section class="auth-section">
+            <h3>Login</h3>
+            <form id="loginForm">
+                <input type="email" id="loginEmail" placeholder="Email" required>
+                <input type="password" id="loginPassword" placeholder="Password" required>
+                <button type="submit">Login</button>
+            </form>
+        </section>
+
+        <section id="deckSection" class="hidden">
+            <h3>Create deckSection</h3>
+            <form id="deckForm">
+                <input type="text" id="deckName" placeholder="Deck Name" required>
+                <button type="submit">Create Deck</button>
+            </form>
+
+            <h3>Update Win/Loss Rate</h3>
+            <form id="winrateForm">
+                <input type="text" id="userDeck" placeholder="Your Deck" required>
+                <input type="text" id="opponentDeck" placeholder="Opponent Deck" required>
+                <input type="number" id="wins" placeholder="Wins" required>
+                <input type="number" id="losses" placeholder="Losses" required>
+                <button type="submit"> Update WinRate</button>
+            </form>
+        </section>
     </main>
+
+    <footer>
+        <p>May the Force be with you - WinRate, a Star Wars themed platform</p>
+    </footer>
+
+    <script src="script.js"></script>
 </body>
 </html>
