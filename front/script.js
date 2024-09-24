@@ -23,11 +23,12 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     document.getElementById('loginForm').addEventListener('submit', function(e){
-        e.preventDefault();
+        e.preventDefault(); // prevent default comportament of forms (refresh page)
 
         const email = document.getElementById('loginEmail').value;
         const password = document.getElementById('loginPassword').value;
 
+        // Requisition POST to the API login
         fetch('http://localhost:8080/login', {
             method: 'POST',
             headers: {
@@ -37,9 +38,10 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .then(response => response.json())
         .then(data => {
-            if (data.success) {
-                alert('Login successful!');
-                document.getElementById('deckSection').classList.remove('hidden');
+            if (data.message === 'Login realizado com sucesso') {
+                // alert('Login successful!');
+                // document.getElementById('deckSection').classList.remove('hidden');
+                window.location.href = '/home';
             } else {
                 alert('Login failed!');
             }

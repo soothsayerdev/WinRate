@@ -29,7 +29,7 @@ func main() {
 	if err != nil {
 		log.Fatal("Erro ao conectar ao banco de dados: ", err)
 	}
-	defer db.Close()
+	//defer db.Close()
 
 	// verify the connection
 	err = db.Ping()
@@ -45,7 +45,7 @@ func main() {
 	router.HandleFunc("/register", registerUser).Methods("POST")
 	router.HandleFunc("/login", loginUser).Methods("POST")
 	router.HandleFunc("/decks", createDeck).Methods("POST")
-	router.HandleFunc("matches", createMatch).Methods("POST")
+	router.HandleFunc("/matches", createMatch).Methods("POST")
 	router.HandleFunc("/matches/{id}", updateMatch).Methods("PUT")
 
 	log.Fatal(http.ListenAndServe(":8080", router))
@@ -177,7 +177,13 @@ func createDeck(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Fprintf(w, "Deck criado com sucesso!")
+	// fmt.Fprintf(w, "Deck criado com sucesso!")
+
+	w.WriteHeader(http.StatusCreated)
+	response := map[string]string {
+		"message": "Deck criado com sucesso!",
+	}
+	json.NewEncoder(w).Encode(response)
 }
 
 func createMatch(w http.ResponseWriter, r *http.Request) {
@@ -195,8 +201,12 @@ func createMatch(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Fprintf(w, "Partida criada com sucesso!")
-
+	// fmt.Fprintf(w, "Partida criada com sucesso!")
+	w.WriteHeader(http.StatusCreated)
+	response := map[string]string{
+		"message": "Match criada com sucesso!",
+	}
+	json.NewEncoder(w).Encode(response)
 }
 
 func updateMatch(w http.ResponseWriter, r *http.Request) {
@@ -216,6 +226,12 @@ func updateMatch(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Fprintf(w, "Partida atualizada com sucesso!")
+	// fmt.Fprintf(w, "Partida atualizada com sucesso!")
+	w.WriteHeader(http.StatusCreated)
+	response := map[string]string{
+		"message": "Match atualizada com sucesso!",
+	}
+	json.NewEncoder(w).Encode(response)
+
 }
 
