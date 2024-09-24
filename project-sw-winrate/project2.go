@@ -6,17 +6,24 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/mux"
 )
 
-va db *sql.db
+var db *sql.db
 
 func main() {
 	var err error
 	// conect to mysql
-	dsn := "root:20063020soothSAYER#@tcp(127.0.0.1:3306)/WinRate"
+	// "root:20063020soothSAYER#@tcp(127.0.0.1:3306)/WinRate"
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:3306)/%s",
+		os.Getenv("DB_USER"),
+		os.Getenv("DB_PASSWORD"),
+		os.Getenv("DB_HOST"),
+        os.Getenv("DB_NAME"))
+
 	db, err = sql.Open("mysql", dsn)
 	if err != nil {
 		log.Fatal("Erro ao conectar ao banco de dados: ", err)
@@ -58,7 +65,7 @@ type Deck struct {
 }
 
 
-func registerUser(w http.Response Writer, r *http.Request) {
+func registerUser(w http.ResponseWriter, r *http.Request) {
 	var user User
 	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {

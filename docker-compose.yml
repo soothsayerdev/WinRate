@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  # Service of mysql
+  db:
+   image: mysql:8.0.23
+   container_name: mysql_container
+   restart: always
+   environment:
+    MYSQL_ROOT_PASSWORD: 20063020soothSAYER#
+    MYSQL_DATABASE: WinRate
+    MYSQL_USER: root
+    MYSQL_PASSWORD: 20063020soothSAYER#
+  ports:
+  - "3306:3306"
+  volumes:
+  - mysql_data:/var/lib/mysql
+
+  # Service of GO
+  app:
+   build: .
+   container_name: golang_container
+   ports:
+   - "8080.8080"
+   depends_on:
+   - db
+   environment:
+    DB_HOST: root
+    DB_USER: root
+    DB_PASSWORD: 20063020soothSAYER#
+    DB_NAME: WinRate
+    DB_PORT: 3306
+   volumes:
+   - .:/app
+   command: ["./main"]
+
+volumes:
+  mysql_data: 
