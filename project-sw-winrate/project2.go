@@ -11,10 +11,11 @@ import (
 	"log"
 	"net/http"
 	"os"
+
 	"golang.org/x/crypto/bcrypt" // To compare password with hash
 
-	"github.com/gorilla/mux"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/gorilla/mux"
 )
 
 var db *sql.DB
@@ -24,10 +25,10 @@ func main() {
 	// conect to mysql
 	// "root:20063020soothSAYER#@tcp(127.0.0.1:3306)/WinRate"
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:3306)/%s",
-		os.Getenv("root"),
-		os.Getenv("20063020soothSAYER#"),
-		os.Getenv("localhost"),
-        os.Getenv("WinRate"))
+		os.Getenv("DB_USER"),
+		os.Getenv("DB_PASS"),
+		os.Getenv("DB_HOST"),
+		os.Getenv("DB_NAME"))
 
 	db, err = sql.Open("mysql", dsn)
 	if err != nil {
@@ -46,35 +47,62 @@ func main() {
 	// configuration the routes
 	router := mux.NewRouter()
 
+	// configuration of middleware CORS
+	router.Use(middlewareCORS)
+
 	router.HandleFunc("/register", registerUser).Methods("POST")
 	router.HandleFunc("/login", loginUser).Methods("POST")
 	router.HandleFunc("/decks", createDeck).Methods("POST")
 	router.HandleFunc("/matches", createMatch).Methods("POST")
 	router.HandleFunc("/matches/{id}", updateMatch).Methods("PUT")
+	router.HandleFunc("/status", testResponse).Methods("GET")
 
 	log.Fatal(http.ListenAndServe(":8080", router))
+} 
+
+func middlewareCORS(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")  // Permite requisições de qualquer origem
+		w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE") // Métodos permitidos
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")    // Cabeçalhos permitidos
+		// Para requisições OPTIONS (pré-vôo CORS), retorna sem passar ao próximo handler
+		if r.Method == http.MethodOptions {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+		next.ServeHTTP(w, r)
+	})
 }
 
 type User struct {
-	ID 			int `json:"userID"`
-	Email 		string `json:"email"`
-	Password 	string `json:"password"`
+	ID       int    `json:"userID"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
 }
 
 type Deck struct {
-	ID 					int `json:"id"`
-	UserID 				int `json:"user_id"`
-	DeckName 	 		string `json:"deck_name"`
+	ID       int    `json:"id"`
+	UserID   int    `json:"user_id"`
+	DeckName string `json:"deck_name"`
 }
 
 type Match struct {
-	ID 					int `json:"matchsID"`
-	UserDeckID 			int `json:"user_deck_id"`
-	OpponentDeckID 		int `json:"opponent_deck_id"`
-	Victories         	int `json:"victories"`
-	Defeats 	 		int `json:"defeats"`
+	ID             int `json:"matchsID"`
+	UserDeckID     int `json:"user_deck_id"`
+	OpponentDeckID int `json:"opponent_deck_id"`
+	Victories      int `json:"victories"`
+	Defeats        int `json:"defeats"`
 }
 
+func testResponse(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	response := map[string]string{
+		"message": "Test response",
+		"status":  "sucesso",
+	}
+	json.NewEncoder(w).Encode(response)
+}
 
 func registerUser(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
@@ -92,10 +120,10 @@ func registerUser(w http.ResponseWriter, r *http.Request) {
 	var existingUserID int
 	err = db.QueryRow("SELECT userID FROM users WHERE email = ?", user.Email).Scan(&existingUserID)
 	if err == nil { // If email exists, return an error message
-        http.Error(w, "Email já cadastrado", http.StatusConflict)
-        return
-    }
-	
+		http.Error(w, "Email já cadastrado", http.StatusConflict)
+		return
+	}
+
 	// Generate the hash of password
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 	if err != nil {
@@ -103,15 +131,15 @@ func registerUser(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Erro ao gerar senha", http.StatusInternalServerError)
 		return
 	}
-	
-    // Insert new user into database
+
+	// Insert new user into database
 	query := "INSERT INTO user (email, password) VALUES (?, ?)"
 	_, err = db.Exec(query, user.Email, string(hashedPassword))
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	
+
 	// Return the response of sucess in register
 	response := map[string]string{
 		"message": "Usuario registrado com sucesso!",
@@ -165,8 +193,6 @@ func loginUser(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(response)
 }
 
-
-
 func createDeck(w http.ResponseWriter, r *http.Request) {
 	var deck Deck
 	err := json.NewDecoder(r.Body).Decode(&deck)
@@ -184,7 +210,7 @@ func createDeck(w http.ResponseWriter, r *http.Request) {
 	// fmt.Fprintf(w, "Deck criado com sucesso!")
 
 	w.WriteHeader(http.StatusCreated)
-	response := map[string]string {
+	response := map[string]string{
 		"message": "Deck criado com sucesso!",
 	}
 	json.NewEncoder(w).Encode(response)
@@ -199,7 +225,7 @@ func createMatch(w http.ResponseWriter, r *http.Request) {
 	}
 
 	_, err = db.Exec("INSERT INTO matches (user_deck_id, opponent_deck_id, victories, defeats) VALUES (?, ?, ?, ?)",
-					match.UserDeckID, match.OpponentDeckID, match.Victories, match.Defeats)
+		match.UserDeckID, match.OpponentDeckID, match.Victories, match.Defeats)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -238,4 +264,3 @@ func updateMatch(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(response)
 
 }
-

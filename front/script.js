@@ -35,7 +35,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({ email: email, password: password}),
+            mode: 'cors' // Isso informa que estamos cientes da política de CORS
         })
+        
         .then(response => response.json())
         .then(data => {
             if (data.message === 'Login realizado com sucesso') {
