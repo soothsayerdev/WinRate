@@ -56,7 +56,7 @@ func main() {
 }
 
 type User struct {
-	ID 			int `json:"id"`
+	ID 			int `json:"userID"`
 	Email 		string `json:"email"`
 	Password 	string `json:"password"`
 }
@@ -68,7 +68,7 @@ type Deck struct {
 }
 
 type Match struct {
-	ID 					int `json:"id"`
+	ID 					int `json:"matchsID"`
 	UserDeckID 			int `json:"user_deck_id"`
 	OpponentDeckID 		int `json:"opponent_deck_id"`
 	Victories         	int `json:"victories"`
@@ -90,7 +90,7 @@ func registerUser(w http.ResponseWriter, r *http.Request) {
 
 	// Check if email already exists in database
 	var existingUserID int
-	err = db.QueryRow("SELECT id FROM users WHERE email = ?", user.Email).Scan(&existingUserID)
+	err = db.QueryRow("SELECT userID FROM users WHERE email = ?", user.Email).Scan(&existingUserID)
 	if err == nil { // If email exists, return an error message
         http.Error(w, "Email já cadastrado", http.StatusConflict)
         return
@@ -105,7 +105,7 @@ func registerUser(w http.ResponseWriter, r *http.Request) {
 	}
 	
     // Insert new user into database
-	query := "INSERT INTO users (email, password) VALUES (?, ?)"
+	query := "INSERT INTO user (email, password) VALUES (?, ?)"
 	_, err = db.Exec(query, user.Email, string(hashedPassword))
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -139,7 +139,7 @@ func loginUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// consult in database to verify if user exists
-	query := "SELECT id, password FROM users WHERE email = ?"
+	query := "SELECT userID, password FROM users WHERE email = ?"
 	err = db.QueryRow(query, user.Email).Scan(&user.ID, &dbPassword)
 	if err != nil {
 		if err == sql.ErrNoRows {
