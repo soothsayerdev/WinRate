@@ -25,7 +25,7 @@ func main() {
 	// "root:20063020soothSAYER#@tcp(127.0.0.1:3306)/WinRate"
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:3306)/%s",
 		os.Getenv("root"),
-		os.Getenv("20063020soothSAYER"),
+		os.Getenv("20063020soothSAYER#"),
 		os.Getenv("localhost"),
         os.Getenv("WinRate"))
 
