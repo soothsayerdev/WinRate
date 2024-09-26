@@ -22,11 +22,11 @@ var db *sql.DB
 
 func middlewareCORS(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		//w.Header().Set("Access-Control-Allow-Origin", "https://WinRate.com")
 		log.Println("CORS MiddleWare triggered")
-		w.Header().Set("Access-Control-Allow-Origin", "http://localhost:8080")                                              // Permite requisições de qualquer origem
-		w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")               // Métodos permitidos
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With") // Cabeçalhos permitidos
+		w.Header().Set("Access-Control-Allow-Origin", "*")  // Permite requisições de qualquer origem
+		w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With")
+		
 		// Para requisições OPTIONS (preflight CORS), retorna sem passar ao próximo handler
 		if r.Method == "OPTIONS" {
 			w.WriteHeader(http.StatusOK)
@@ -35,6 +35,7 @@ func middlewareCORS(next http.Handler) http.Handler {
 		next.ServeHTTP(w, r)
 	})
 }
+
 
 func main() {
 	var err error

@@ -63,7 +63,7 @@ document.addEventListener('DOMContentLoaded', function() {
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ name: deckname }),
+            body: JSON.stringify({ name: deckName }),
         })
         .then(response => response.json())
         .then(data => {
