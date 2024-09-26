@@ -2,7 +2,9 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: 'Star Jedi', sans-serif;
+    font-family: 'SF Distant Galaxy', sans-serif;
+    font-family: 'SF Distant Galaxy AltOutline', sans-serif;
+
 }
 
 body {
@@ -82,5 +84,5 @@ footer {
 
 @font-face {
     font-family: 'Star Jedi';
-    src: url('https://fonts.cdnfonts.com/s/20802/StarJedi.ttf') format('truetype');
+    src: url ('https://fonts.cdnfonts.com/css/sf-distant-galaxy');
 }
