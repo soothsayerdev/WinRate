@@ -20,6 +20,22 @@ import (
 
 var db *sql.DB
 
+func middlewareCORS(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		//w.Header().Set("Access-Control-Allow-Origin", "https://WinRate.com")
+		log.Println("CORS MiddleWare triggered")
+		w.Header().Set("Access-Control-Allow-Origin", "http://localhost:8080")                                              // Permite requisições de qualquer origem
+		w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")               // Métodos permitidos
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With") // Cabeçalhos permitidos
+		// Para requisições OPTIONS (preflight CORS), retorna sem passar ao próximo handler
+		if r.Method == "OPTIONS" {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+		next.ServeHTTP(w, r)
+	})
+}
+
 func main() {
 	var err error
 	// conect to mysql
@@ -50,29 +66,31 @@ func main() {
 	// configuration of middleware CORS
 	router.Use(middlewareCORS)
 
-	router.HandleFunc("/register", registerUser).Methods("POST")
-	router.HandleFunc("/login", loginUser).Methods("POST")
-	router.HandleFunc("/decks", createDeck).Methods("POST")
-	router.HandleFunc("/matches", createMatch).Methods("POST")
-	router.HandleFunc("/matches/{id}", updateMatch).Methods("PUT")
-	router.HandleFunc("/status", testResponse).Methods("GET")
+	router.HandleFunc("/register", registerUser).Methods("POST", "OPTIONS")
+	router.HandleFunc("/login", loginUser).Methods("POST", "OPTIONS")
+	router.HandleFunc("/decks", createDeck).Methods("POST", "OPTIONS")
+	router.HandleFunc("/matches", createMatch).Methods("POST", "OPTIONS")
+	router.HandleFunc("/matches/{id}", updateMatch).Methods("PUT", "OPTIONS")
+	//router.HandleFunc("/status", testResponse).Methods("GET")
 
 	log.Fatal(http.ListenAndServe(":8080", router))
-} 
-
-func middlewareCORS(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")  // Permite requisições de qualquer origem
-		w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE") // Métodos permitidos
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")    // Cabeçalhos permitidos
-		// Para requisições OPTIONS (pré-vôo CORS), retorna sem passar ao próximo handler
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusOK)
-			return
-		}
-		next.ServeHTTP(w, r)
-	})
 }
+
+// func middlewareIPWhiteList(next http.Handler) http.Handler {
+// 	return http.HandlerFunc(func(w http.ResponseWriter, r*http.Request){
+// 		allowedIPS := map[string]bool{
+// 			"127.0.0.1": true, // Allow localhost for testing
+//             "localhost:8080": true, // Replace with actual IPs to allow
+// 		}
+
+// 		clientIP := r.RemoteAddr
+// 		if _, allowed := allowedIPS[clientIP]; !allowed {
+// 			http.Error(w, "Forbidden", http.StatusForbidden)
+// 			return
+// 		}
+// 		next.ServeHTTP(w, r)
+// 	})
+// }
 
 type User struct {
 	ID       int    `json:"userID"`
@@ -94,15 +112,15 @@ type Match struct {
 	Defeats        int `json:"defeats"`
 }
 
-func testResponse(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
+// func testResponse(w http.ResponseWriter, r *http.Request) {
+// 	w.Header().Set("Content-Type", "application/json")
 
-	response := map[string]string{
-		"message": "Test response",
-		"status":  "sucesso",
-	}
-	json.NewEncoder(w).Encode(response)
-}
+// 	response := map[string]string{
+// 		"message": "Test response",
+// 		"status":  "sucesso",
+// 	}
+// 	json.NewEncoder(w).Encode(response)
+// }
 
 func registerUser(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
