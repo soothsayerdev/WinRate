@@ -38,7 +38,14 @@ document.addEventListener('DOMContentLoaded', function() {
             
         })
         
-        .then(response => response.json())
+        //.then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                return response.text().then(text => { throw new Error(text); });
+            }
+            return response.json();
+        })
+        
         .then(data => {
             // if (data.message === 'Login realizado com sucesso') {
             //     // alert('Login successful!');
@@ -47,13 +54,15 @@ document.addEventListener('DOMContentLoaded', function() {
             // } else {
             //     alert('Login failed!');
             // }
-            try{
-                const jsonData = JSON.parse(data);
-                console.log(jsonData);
-            } catch (error) {
-                console.error("Erro ao converter resposta em JSON:", error);
-                console.log(data); 
-            }
+        //     try{
+        //         const jsonData = JSON.parse(data);
+        //         console.log(jsonData);
+        //     } catch (error) {
+        //         console.error("Erro ao converter resposta em JSON:", error);
+        //         console.log(data); 
+        //     }
+        // })
+            console.log(data);    
         })
         .catch(error => {
             console.error('Error:', error);

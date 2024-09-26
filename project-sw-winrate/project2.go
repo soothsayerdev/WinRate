@@ -181,7 +181,7 @@ func loginUser(w http.ResponseWriter, r *http.Request) {
 	// decodify JSON requested in requisition to struct User
 	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
-		http.Error(w, "Dados invalidos", http.StatusBadRequest)
+		http.Error(w, `{"Dados invalidos"}`, http.StatusBadRequest)
 		return
 	}
 
@@ -190,9 +190,9 @@ func loginUser(w http.ResponseWriter, r *http.Request) {
 	err = db.QueryRow(query, user.Email).Scan(&user.ID, &dbPassword)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			http.Error(w, "Usuario não encontrado", http.StatusUnauthorized)
+			http.Error(w, `{"Usuario não encontrado"}`, http.StatusUnauthorized)
 		} else {
-			http.Error(w, "Erro ao buscar o usuario", http.StatusInternalServerError)
+			http.Error(w, `{"Erro ao buscar o usuario"}`, http.StatusInternalServerError)
 		}
 		return
 	}
