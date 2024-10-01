@@ -186,7 +186,7 @@ func loginUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// consult in database to verify if user exists
-	query := "SELECT userID, password FROM users WHERE email = ?"
+	query := "SELECT userID, password FROM user WHERE email = ?" 
 	err = db.QueryRow(query, user.Email).Scan(&user.ID, &dbPassword)
 	if err != nil {
 		if err == sql.ErrNoRows {
