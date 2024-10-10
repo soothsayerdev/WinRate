@@ -23,10 +23,10 @@ var db *sql.DB
 func middlewareCORS(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		log.Println("CORS MiddleWare triggered")
-		w.Header().Set("Access-Control-Allow-Origin", "*")  // Permite requisições de qualquer origem
+		w.Header().Set("Access-Control-Allow-Origin", "*") // Permite requisições de qualquer origem
 		w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With")
-		
+
 		// Para requisições OPTIONS (preflight CORS), retorna sem passar ao próximo handler
 		if r.Method == "OPTIONS" {
 			w.WriteHeader(http.StatusOK)
@@ -35,7 +35,6 @@ func middlewareCORS(next http.Handler) http.Handler {
 		next.ServeHTTP(w, r)
 	})
 }
-
 
 func main() {
 	var err error
@@ -186,7 +185,7 @@ func loginUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// consult in database to verify if user exists
-	query := "SELECT userID, password FROM user WHERE email = ?" 
+	query := "SELECT userID, password FROM user WHERE email = ?"
 	err = db.QueryRow(query, user.Email).Scan(&user.ID, &dbPassword)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -207,7 +206,8 @@ func loginUser(w http.ResponseWriter, r *http.Request) {
 	// Return a response of login sucess
 	response := map[string]interface{}{
 		"message": "Login realizado com sucesso",
-		"user_id": user.ID,
+		"userID": user.ID,
+		"success": true,
 	}
 	json.NewEncoder(w).Encode(response)
 }
@@ -217,6 +217,11 @@ func createDeck(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&deck)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if deck.UserID == 0 {
+		http.Error(w, "ID do usúario é necessário", http.StatusBadRequest)
 		return
 	}
 
@@ -235,6 +240,14 @@ func createDeck(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(response)
 }
 
+func calculateWinRate(victories int, defeats int) float64 {
+	totalGames := victories + defeats
+	if totalGames == 0 {
+		return 0
+	}
+	return (float64(victories) / float64(totalGames)) * 100
+}
+
 func createMatch(w http.ResponseWriter, r *http.Request) {
 	var match Match
 	err := json.NewDecoder(r.Body).Decode(&match)
@@ -243,6 +256,8 @@ func createMatch(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	winRate := calculateWinRate(match.Victories, match.Defeats)
+
 	_, err = db.Exec("INSERT INTO matches (user_deck_id, opponent_deck_id, victories, defeats) VALUES (?, ?, ?, ?)",
 		match.UserDeckID, match.OpponentDeckID, match.Victories, match.Defeats)
 	if err != nil {
@@ -250,11 +265,12 @@ func createMatch(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	response := map[string]interface{}{
+		"message": "Match criada com sucesso!",
+		"winRate": winRate,
+	}
 	// fmt.Fprintf(w, "Partida criada com sucesso!")
 	w.WriteHeader(http.StatusCreated)
-	response := map[string]string{
-		"message": "Match criada com sucesso!",
-	}
 	json.NewEncoder(w).Encode(response)
 }
 
@@ -269,6 +285,8 @@ func updateMatch(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	matchID := vars["id"]
 
+	winRate := calculateWinRate(match.Victories, match.Defeats)
+
 	_, err = db.Exec("UPDATE matches SET victories = ?, defeats = ? WHERE id = ?", match.Victories, match.Defeats, matchID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -276,10 +294,11 @@ func updateMatch(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// fmt.Fprintf(w, "Partida atualizada com sucesso!")
-	w.WriteHeader(http.StatusCreated)
-	response := map[string]string{
-		"message": "Match atualizada com sucesso!",
+	response := map[string]interface{}{
+		"message":  "Match atualizada com sucesso!",
+		"win_rate": winRate,
 	}
+	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(response)
 
 }
