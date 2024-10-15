@@ -7,6 +7,25 @@ document.addEventListener('DOMContentLoaded', function() {
         window.location.href = '/index.html';
         return;
     }
+
+    fetch('http://localhost:8080/decks')
+        .then(response => response.json())
+        .then(data => {
+            data.array.forEach(deck => {
+                deckNames[deck.user_deck_id] = deck.deck_name; // map id to deck name
+            });
+            console.log("Deck names loaded: ", deckNames);
+            
+            updateTable();
+        })
+        .catch(error => {
+            console.error('Error fetching decks:', error);
+        });
+    
+    function updateTable() {
+        newRow.insertCell(0).textContent = deckNames[userDeckInt] || userDeckInt;
+        newRow.insertCell(1).textContent = deckNames[opponentDeckInt] || opponentDeckInt;
+    }
     
     // Handle deck creation
     document.getElementById('deckForm').addEventListener('submit', function(e) {

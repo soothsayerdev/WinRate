@@ -66,6 +66,7 @@ func main() {
 	// configuration of middleware CORS
 	router.Use(middlewareCORS)
 
+	router.HandleFunc("/decks", getDecks).Methods("GET", "OPTIONS")
 	router.HandleFunc("/register", registerUser).Methods("POST", "OPTIONS")
 	router.HandleFunc("/login", loginUser).Methods("POST", "OPTIONS")
 	router.HandleFunc("/decks", createDeck).Methods("POST", "OPTIONS")
@@ -206,7 +207,7 @@ func loginUser(w http.ResponseWriter, r *http.Request) {
 	// Return a response of login sucess
 	response := map[string]interface{}{
 		"message": "Login realizado com sucesso",
-		"userID": user.ID,
+		"userID":  user.ID,
 		"success": true,
 	}
 	json.NewEncoder(w).Encode(response)
@@ -300,5 +301,30 @@ func updateMatch(w http.ResponseWriter, r *http.Request) {
 	}
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(response)
+}
 
+func getDecks(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-type", "application/json")
+
+	rows, err := db.Query("SELECT id, deck_name FROM decks")
+	if err != nil {
+		http.Error(w, "Erro ao buscar decks", http.StatusInternalServerError)
+		return
+	}
+	defer rows.Close()
+
+	var decks []Deck
+	for rows.Next() {
+		var deck Deck
+		if err := rows.Scan(&deck.ID, &deck.DeckName); err != nil {
+			http.Error(w, "Erro ao ler dados do deck", http.StatusInternalServerError)
+			return
+		}
+		decks = append(decks, deck)
+	}
+
+	if err := json.NewEncoder(w).Encode(decks); err != nil {
+		http.Error(w, "Erro ao serializar dados do deck", http.StatusInternalServerError)
+		return
+	}
 }
