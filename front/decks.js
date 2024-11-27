@@ -1,42 +1,64 @@
 let deckNames = {}; // Storage to map name of deck by ID
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const userID = localStorage.getItem('userID');
-    if(!userID) {
+    if (!userID) {
         alert('User not logged in');
         window.location.href = '/index.html';
         return;
     }
 
     fetch('http://localhost:8080/decks')
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
         .then(data => {
-            data.array.forEach(deck => {
-                deckNames[deck.user_deck_id] = deck.deck_name; // map id to deck name
+            data.forEach(deck => {
+                deckNames[deck.ID] = deck.DeckName; // Map deck ID to name
             });
             console.log("Deck names loaded: ", deckNames);
-            
             updateTable();
         })
         .catch(error => {
             console.error('Error fetching decks:', error);
         });
-    
+
     function updateTable() {
-        newRow.insertCell(0).textContent = deckNames[userDeckInt] || userDeckInt;
-        newRow.insertCell(1).textContent = deckNames[opponentDeckInt] || opponentDeckInt;
+        // Simulating table update with sample data
+        const exampleMatches = [
+            { userDeckInt: 1, opponentDeckInt: 2, wins: 5, losses: 3 },
+            { userDeckInt: 2, opponentDeckInt: 1, wins: 2, losses: 6 },
+        ];
+
+        exampleMatches.forEach(match => {
+            addRowToTable(match.userDeckInt, match.opponentDeckInt, match.wins, match.losses);
+        });
     }
-    
+
+    function addRowToTable(userDeckInt, opponentDeckInt, winsInt, lossesInt) {
+        const table = document.getElementById('deckStatsTable').getElementsByTagName('tbody')[0];
+        const newRow = table.insertRow();
+
+        newRow.insertCell(0).textContent = deckNames[userDeckInt] || `ID: ${userDeckInt}`;
+        newRow.insertCell(1).textContent = deckNames[opponentDeckInt] || `ID: ${opponentDeckInt}`;
+        newRow.insertCell(2).textContent = winsInt;
+        newRow.insertCell(3).textContent = lossesInt;
+
+        const totalMatches = winsInt + lossesInt;
+        const winRate = totalMatches ? (winsInt / totalMatches) * 100 : 0; // Avoid division by zero
+        newRow.insertCell(4).textContent = `${winRate.toFixed(2)}%`;
+    }
+
     // Handle deck creation
-    document.getElementById('deckForm').addEventListener('submit', function(e) {
+    document.getElementById('deckForm').addEventListener('submit', function (e) {
         e.preventDefault();
 
         const deckName = document.getElementById('deckName').value;
+        const userIdInt = parseInt(userID, 10);
 
-        // Convert userID to integer
-        const userIdInt = parseInt(userID, 10); // Base 10
-        
-        // Check if userIdInt is a valid number
         if (isNaN(userIdInt)) {
             alert('Invalid user ID');
             return;
@@ -47,49 +69,41 @@ document.addEventListener('DOMContentLoaded', function() {
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ 
+            body: JSON.stringify({
                 deck_name: deckName,
-                user_id: userIdInt, // Assuming user_id is stored in localStorage
+                user_id: userIdInt,
             }),
         })
-        .then(response => {
-            if(!response.ok) {
-                return response.text().then(text => { 
-                    console.log('Error response:', text);
-                    throw new Error(text);
-                });
-                
-            }
-            return response.json();
-        })
-        .then(data => {
-            alert('Deck created successfuly!');
-            // Optionally, refresh the table with new deck data
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Failed to create deck: ' + error.message);
-        });
-        console.log('Deck name:', deckName);
-        console.log('User ID:', userID);
+            .then(response => {
+                if (!response.ok) {
+                    return response.text().then(text => {
+                        console.log('Error response:', text);
+                        throw new Error(text);
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                alert('Deck created successfully!');
+                deckNames[data.deckId] = data.deck_name;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to create deck: ' + error.message);
+            });
     });
 
     // Handle WinRate updates
-    document.getElementById('winrateForm').addEventListener('submit', function(e){
+    document.getElementById('winrateForm').addEventListener('submit', function (e) {
         e.preventDefault();
 
         const userDeck = document.getElementById('userDeck').value;
         const opponentDeck = document.getElementById('opponentDeck').value;
         const wins = document.getElementById('wins').value;
         const losses = document.getElementById('losses').value;
-    
-        //const winRate = (wins / (parseInt(wins) + parseInt(losses))) * 100;
-        
-        // Convert string to id
+
         const userDeckInt = parseInt(userDeck);
-        const opponentDeckInt = parseInt(opponentDeck)
-        
-        // Convert wins and losses and int
+        const opponentDeckInt = parseInt(opponentDeck);
         const winsInt = parseInt(wins);
         const lossesInt = parseInt(losses);
 
@@ -102,38 +116,24 @@ document.addEventListener('DOMContentLoaded', function() {
                 user_deck_id: userDeckInt,
                 opponent_deck_id: opponentDeckInt,
                 victories: winsInt,
-                defeats: lossesInt
+                defeats: lossesInt,
             }),
         })
-        .then(response => {
-            if(!response.ok) {
-                return response.text().then(text => {
-                    console.log('Error response:', text);
-                    throw new Error(text);
-                });
-            }
-            return response.json();
-        })
-        .then(data => {
-            console.log('Response data:', data);
-            alert('WinRate updated sucessfully!');
-            // Add a new row to the table with updated stats
-            const table = document.getElementById('deckStatsTable').getElementsByTagName('tbody')[0];
-            const newRow = table.insertRow();
-
-            newRow.insertCell(0).textContent = deckNames[userDeckInt] || userDeckInt;
-            newRow.insertCell(1).textContent = deckNames[opponentDeckInt] || opponentDeckInt;
-            newRow.insertCell(2).textContent = wins;
-            newRow.insertCell(3).textContent = losses;
-
-            // Calculate and display the win rate
-            const totalMatches = winsInt + lossesInt;
-            const winRate = totalMatches ? (winsInt / totalMatches) * 100 : 0; // Avoid divison for zero
-            newRow.insertCell(4).textContent = winRate.toFixed(2) + "%";
-        
-        })
-        .catch(error => {
-            console.error('Error:', error);
-        });
+            .then(response => {
+                if (!response.ok) {
+                    return response.text().then(text => {
+                        console.log('Error response:', text);
+                        throw new Error(text);
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                alert('WinRate updated successfully!');
+                addRowToTable(userDeckInt, opponentDeckInt, winsInt, lossesInt);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
     });
 });

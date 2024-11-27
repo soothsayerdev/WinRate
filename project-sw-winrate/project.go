@@ -276,27 +276,31 @@ func updateMatch(w http.ResponseWriter, r *http.Request) {
 }
 
 func getDecks(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-type", "application/json")
+    w.Header().Set("Content-type", "application/json")
 
-	rows, err := db.Query("SELECT id, deck_name FROM decks")
-	if err != nil {
-		http.Error(w, "Erro ao buscar decks", http.StatusInternalServerError)
-		return
-	}
-	defer rows.Close()
+    rows, err := db.Query("SELECT id, deck_name, user_id FROM decks") // Altere o nome das colunas se necessário
+    if err != nil {
+        log.Printf("Erro ao buscar decks: %v", err)
+        http.Error(w, "Erro ao buscar decks", http.StatusInternalServerError)
+        return
+    }
+    defer rows.Close()
 
-	var decks []Deck
-	for rows.Next() {
-		var deck Deck
-		if err := rows.Scan(&deck.ID, &deck.DeckName); err != nil {
-			http.Error(w, "Erro ao ler dados do deck", http.StatusInternalServerError)
-			return
-		}
-		decks = append(decks, deck)
-	}
+    var decks []Deck
+    for rows.Next() {
+        var deck Deck
+        if err := rows.Scan(&deck.ID, &deck.DeckName, &deck.UserID); err != nil {
+            log.Printf("Erro ao escanear dados do deck: %v", err)
+            http.Error(w, "Erro ao ler dados do deck", http.StatusInternalServerError)
+            return
+        }
+        decks = append(decks, deck)
+    }
 
-	if err := json.NewEncoder(w).Encode(decks); err != nil {
-		http.Error(w, "Erro ao serializar dados do deck", http.StatusInternalServerError)
-		return
-	}
+    if err := json.NewEncoder(w).Encode(decks); err != nil {
+        log.Printf("Erro ao serializar dados do deck: %v", err)
+        http.Error(w, "Erro ao serializar dados do deck", http.StatusInternalServerError)
+        return
+    }
 }
+
