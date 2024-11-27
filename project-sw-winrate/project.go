@@ -76,23 +76,6 @@ func main() {
 
 	log.Fatal(http.ListenAndServe(":8080", router))
 }
-
-// func middlewareIPWhiteList(next http.Handler) http.Handler {
-// 	return http.HandlerFunc(func(w http.ResponseWriter, r*http.Request){
-// 		allowedIPS := map[string]bool{
-// 			"127.0.0.1": true, // Allow localhost for testing
-//             "localhost:8080": true, // Replace with actual IPs to allow
-// 		}
-
-// 		clientIP := r.RemoteAddr
-// 		if _, allowed := allowedIPS[clientIP]; !allowed {
-// 			http.Error(w, "Forbidden", http.StatusForbidden)
-// 			return
-// 		}
-// 		next.ServeHTTP(w, r)
-// 	})
-// }
-
 type User struct {
 	ID       int    `json:"userID"`
 	Email    string `json:"email"`
@@ -112,17 +95,6 @@ type Match struct {
 	Victories      int `json:"victories"`
 	Defeats        int `json:"defeats"`
 }
-
-// func testResponse(w http.ResponseWriter, r *http.Request) {
-// 	w.Header().Set("Content-Type", "application/json")
-
-// 	response := map[string]string{
-// 		"message": "Test response",
-// 		"status":  "sucesso",
-// 	}
-// 	json.NewEncoder(w).Encode(response)
-// }
-
 func registerUser(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 

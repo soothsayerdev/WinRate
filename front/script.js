@@ -38,7 +38,6 @@ document.addEventListener("DOMContentLoaded", function () {
       },
       body: JSON.stringify({ email: email, password: password }),
     })
-      //.then(response => response.json())
       .then(async (response) => {
         if (!response.ok) {
           const text = await response.text();
@@ -50,21 +49,6 @@ document.addEventListener("DOMContentLoaded", function () {
       .then(data => {
         console.log(Object.values(data))
         console.log(Object.keys(data))
-        // if (data.message === 'Login realizado com sucesso') {
-        //     // alert('Login successful!');
-        //     // document.getElementById('deckSection').classList.remove('hidden');
-        //     window.location.href = '/home';
-        // } else {
-        //     alert('Login failed!');
-        // }
-        //     try{
-        //         const jsonData = JSON.parse(data);
-        //         console.log(jsonData);
-        //     } catch (error) {
-        //         console.error("Erro ao converter resposta em JSON:", error);
-        //         console.log(data);
-        //     }
-        // })
         if (data.success) {
           // Save the user id in localStorage
           localStorage.setItem("userID", data.userID);
