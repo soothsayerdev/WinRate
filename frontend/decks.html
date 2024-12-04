@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Decks - WinRate</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header class="header">
+        <h1>WinRate</h1>
+        <h2>Manage Your Decks and WinRates</h2>
+    </header>
+
+    <main class="main-container">
+        <div class="flex-container">
+            <div>
+                <section class="deck-section">
+                    <h3>Create a New Deck</h3>
+                    <form class="form-style" id="deckForm">
+                        <input type="text" id="deckName" placeholder="Deck Name" required>
+                        <button type="submit" class="btn">Create Deck</button>
+                    </form>
+                </section>
+    
+                <section class="winrate-section">
+                    <h3>Update Win/Loss Rate</h3>
+                    <form id="winrateForm" class="form-style">
+                        <input type="text" id="userDeck" placeholder="Your Deck ID" required>
+                        <input type="text" id="opponentDeck" placeholder="Opponent Deck ID" required>
+                        <input type="number" id="wins" placeholder="Wins" min="0" required>
+                        <input type="number" id="losses" placeholder="Losses" min="0" required>
+                        <button id="btn_updateWinRate" class="btn">Update WinRate</button>
+                    </form>
+                </section>
+            </div>
+    
+            <section class="stats-section">
+                <h3>Your Deck Stats</h3>
+                <table id="deckStatsTable" class="table-style">
+                    <thead>
+                        <tr>
+                            <th>Your Deck</th>
+                            <th>Opponent Deck</th>
+                            <th>Wins</th>
+                            <th>Losses</th>
+                            <th>Win Rate (%)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Table rows dynamically added -->
+                    </tbody>
+                </table>
+            </section>
+        </div>
+    </main>
+    
+
+    <footer>
+        <p>May the Force be with you - WinRate, a Star Wars themed platform</p>
+    </footer>
+
+    <script src="scripts/decks.js"></script>
+</body>
+</html>

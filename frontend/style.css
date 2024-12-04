@@ -1,0 +1,100 @@
+/* Reset and base styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Roboto', sans-serif;
+}
+
+body {
+    background-color: #121212; /* Fundo escuro */
+    color: #fff;
+    display: flex;
+    justify-content: center; /* Centraliza horizontalmente */
+    align-items: center; /* Centraliza verticalmente */
+    height: 100vh; /* Ocupa toda a altura da tela */
+    margin: 0;
+    overflow: hidden; /* Evita barras de rolagem desnecessárias */
+}
+
+/* Container principal */
+.main-container {
+    text-align: center;
+    width: 100%;
+    max-width: 600px; /* Define um tamanho máximo */
+    padding: 20px;
+}
+
+/* Header */
+.header {
+    margin-bottom: 30px;
+}
+
+.logo {
+    font-size: 4rem;
+    font-weight: 700;
+    color: #ffcc00;
+    text-shadow: 2px 2px 15px #ff6600;
+    text-transform: uppercase;
+}
+
+.tagline {
+    font-size: 1.5rem;
+    color: #f1c40f;
+    margin-top: 10px;
+}
+
+/* Form Sections */
+.auth-section {
+    background-color: rgba(0, 0, 0, 0.8);
+    border-radius: 10px;
+    padding: 20px;
+    margin: 20px 0;
+    box-shadow: 0 5px 25px rgba(0, 0, 0, 0.7);
+}
+
+h3 {
+    font-size: 2rem;
+    color: #ffcc00;
+    margin-bottom: 10px;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+input[type="email"],
+input[type="password"],
+button {
+    width: 100%;
+    max-width: 300px;
+    margin: 10px 0;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    font-size: 1rem;
+}
+
+button {
+    background-color: #ffcc00;
+    color: #333;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: #ff6600;
+}
+
+/* Footer */
+.footer {
+    margin-top: 30px;
+    font-size: 0.8rem;
+    color: #888;
+    text-align: center;
+    padding: 10px;
+    border-top: 2px solid #ffcc00;
+}
